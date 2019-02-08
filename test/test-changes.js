@@ -105,6 +105,10 @@ describe("ChangeSet", () => {
       ], [[0, 0, 0, 1], [1, 1, 2, 4], [2, 2, 5, 6]])()
   })
 
+  it("can change paragraph block type", find(doc(p("a")), [
+      tr => tr.setBlockType(0, 3, schema.nodes["heading"])  // <h1>a</h1>
+  ], [[0, 1, 0, 1]]))
+
   it("partially merges delete/insert from different addStep calls", find(doc(p("heljo")), [
     tr => tr.delete(3, 5),
     tr => tr.insert(3, t("ll"))
