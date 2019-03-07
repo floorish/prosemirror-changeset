@@ -25,7 +25,7 @@ export class ChangeSet {
   // than adding all those changes at once, since different document
   // tokens might be matched during simplification depending on the
   // boundaries of the current changed ranges.
-  addSteps(newDoc, maps, data) {
+  addSteps(newDoc, maps, data, shouldMinimize) {
     // This works by inspecting the position maps for the changes,
     // which indicate what parts of the document were replaced by new
     // content, and the size of that new content. It uses these to
@@ -55,24 +55,26 @@ export class ChangeSet {
     let newChanges = mergeAll(stepChanges, this.config.combine)
     let changes = Change.merge(this.changes, newChanges, this.config.combine)
 
-    // Minimize changes when possible
-    for (let i = 0; i < changes.length; i++) {
-      let change = changes[i]
-      if (change.fromA == change.toA || change.fromB == change.toB ||
+    if (shouldMinimize !== false) {
+      // Minimize changes when possible
+      for (let i = 0; i < changes.length; i++) {
+        let change = changes[i]
+        if (change.fromA == change.toA || change.fromB == change.toB ||
           // Only look at changes that touch newly added changed ranges
           !newChanges.some(r => r.toB > change.fromB && r.fromB < change.toB)) continue
-      let diff = computeDiff(this.config.doc.content, newDoc.content, change)
+          let diff = computeDiff(this.config.doc.content, newDoc.content, change)
 
-      // Fast path: If they are completely different, don't do anything
-      if (diff.length == 1 && diff[0].fromB == 0 && diff[0].toB == change.toB - change.fromB)
-        continue
+          // Fast path: If they are completely different, don't do anything
+          if (diff.length == 1 && diff[0].fromB == 0 && diff[0].toB == change.toB - change.fromB)
+          continue
 
-      if (diff.length == 1) {
-        changes[i] = diff[0]
-      } else {
-        changes.splice(i, 1, ...diff)
-        i += diff.length - 1
-      }
+          if (diff.length == 1) {
+            changes[i] = diff[0]
+          } else {
+            changes.splice(i, 1, ...diff)
+            i += diff.length - 1
+          }
+        }
     }
 
     return new ChangeSet(this.config, changes)
