@@ -67,6 +67,18 @@ describe("ChangeSet", () => {
     tr => tr.insert(3, t("ll"))
   ], []))
 
+  it("revert a deletion by inserting the character again", find(doc(p("bar")), [
+    tr => tr.delete(2, 3), // br
+    tr => tr.insert(2, t("x")), // bxr
+    tr => tr.insert(2, t("a")) // baxr
+  ], [[3, 3, 3, 4]]))
+
+  it("insert character before changed character", find(doc(p("bar")), [
+    tr => tr.delete(2, 3), // br
+    tr => tr.insert(2, t("x")), // bxr
+    tr => tr.insert(2, t("x")) // bxxr
+  ], [[2, 3, 2, 4]]))
+
   it("partially merges delete/insert from different addStep calls", find(doc(p("heljo")), [
     tr => tr.delete(3, 5),
     tr => tr.insert(3, t("ll"))
@@ -152,7 +164,7 @@ describe("ChangeSet", () => {
     tr => tr.replaceWith(1, 1, t("eAUDOMIKkMf")),
     tr => tr.delete(5, 8),
     tr => tr.replaceWith(3, 3, t("qX"))
-  ], [[3, 12, 3, 10, [[2, 0], [5, 2], [2, 0]], [[7, 0]]]], [2, 0, 0, 0, 0, 0, 0]))
+  ], [[3, 10, 3, 10, [[2, 0], [5, 2]], [[7, 0]]]], [2, 0, 0, 0, 0, 0, 0]))
 
   it("fuzz issue 3", find(doc(p("hfxjahnOuH")), [
     tr => tr.delete(1, 5),
