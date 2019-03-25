@@ -79,36 +79,6 @@ describe("ChangeSet", () => {
     tr => tr.insert(2, t("x")) // bxxr
   ], [[2, 3, 2, 4]]))
 
-  it("can insert paragraphs around paragraph", find(doc(p("bar")), [
-    tr => tr.insert(0, p(""))  // <p></p><p>bar</p>
-      .insert(7, p("")), // <p></p><p>bar</p><p></p>
-  ], [[0, 0, 0, 2], [5, 5, 7, 9]]))
-
-  it("can insert paragraphs after changed paragraph", find(doc(p("")), [
-    tr => tr.insert(1, t("ab")), // <p>ab</p>
-    tr => tr.insert(0, p(""))  // <p></p><p>ab</p>
-      .insert(6, p("")), // <p></p><p>ab</p><p></p>
-  ], [[0, 0, 0, 2], [1, 1, 3, 5], [2, 2, 6, 8]]))
-
-  it("can wrap paragraph with blockquote", () => {
-    const getFullRange = doc => doc.resolve(0).blockRange(doc.resolve(doc.nodeSize - 2))
-    find(doc(p("ab")), [// <p>ab</p>
-      tr => tr.wrap(getFullRange(tr.doc), findWrapping(getFullRange(tr.doc), schema.nodes["blockquote"]))  // <q><p>ab</p></q>
-      ], [[0, 0, 0, 1], [4, 4, 5, 6]])()
-  })
-
-  it("can wrap changed paragraph with blockquote", () => {
-    const getFullRange = doc => doc.resolve(0).blockRange(doc.resolve(doc.nodeSize - 2))
-    find(doc(p("")), [
-      tr => tr.insert(1, t("ab")), // <p>ab</p>
-      tr => tr.wrap(getFullRange(tr.doc), findWrapping(getFullRange(tr.doc), schema.nodes["blockquote"]))  // <q><p>ab</p></q>
-      ], [[0, 0, 0, 1], [1, 1, 2, 4], [2, 2, 5, 6]])()
-  })
-
-  it("can change paragraph block type", find(doc(p("a")), [
-      tr => tr.setBlockType(0, 3, schema.nodes["heading"])  // <h1>a</h1>
-  ], [[0, 1, 0, 1]]))
-
   it("partially merges delete/insert from different addStep calls", find(doc(p("heljo")), [
     tr => tr.delete(3, 5),
     tr => tr.insert(3, t("ll"))
@@ -208,6 +178,11 @@ describe("ChangeSet", () => {
     tr => tr.replaceWith(1, 1, t("atnnH")),
     tr => tr.delete(2, 6)
   ], [[1, 11, 1, 2, [[4, 1], [1, 0], [1, 1], [1, 0], [2, 1], [1, 0]], [[1, 0]]]], [1, 0, 1, 1, 1, 1, 1, 0, 0, 0]))
+
+  it("correctly handles steps with multiple map entries", find(doc(p()), [
+    tr => tr.replaceWith(1, 1, t("ab")),
+    tr => tr.wrap(tr.doc.resolve(1).blockRange(), [{type: schema.nodes.blockquote}])
+  ], [[0, 0, 0, 1], [1, 1, 2, 4], [2, 2, 5, 6]]))
 })
 
 function find(doc, build, changes, sep) {

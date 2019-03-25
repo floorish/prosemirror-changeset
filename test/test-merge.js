@@ -42,33 +42,6 @@ describe("mergeChanges", () => {
   it("can merge replace after insert", () => test(
     [[2, 2, 2, 3]], [[2, 3, 2, 3]], [[2, 2, 2, 3]]
   ))
-
-  describe("multiple changes", () => {
-
-    // a single merge adjusts the fromA and toA values according to the existing changes
-    it("can merge non-overlapping insertions", () => test(
-      [[0, 0, 0, 2]], [[6, 6, 6, 8]], [[0, 0, 0, 2], [4, 4, 6, 8]]
-    ))
-
-    // This gives strange output...
-    // Actually expected something like [[0, 0, 0, 2], [1, 1, 3, 5], [2, 2, 6, 8]]
-    // These input values should therefore not be used in the merge function
-    it("can merge non-overlapping insertions with initial change 1", () => test(
-      [[1, 1, 1, 3]], [[0, 0, 0, 2], [2, 2, 6, 8]], [[0, 0, 0, 2], [2, 2, 6, 8], [1, 1, 7, 9]]
-    ))
-
-    // sort of expected output? fromA and toA have been adjusted
-    it("can merge non-overlapping insertions with initial change 2", () => test(
-      [[1, 1, 1, 3]], [[0, 0, 0, 2], [4, 4, 6, 8]], [[0, 0, 0, 2], [1, 1, 3, 5], [2, 2, 6, 8]]
-    ))
-
-    // sort of expected output? fromA and toA have been adjusted
-    it("can merge non-overlapping insertions with initial change 3", () => test(
-      [[1, 1, 1, 3]], [[0, 0, 0, 2], [6, 6, 6, 8]], [[0, 0, 0, 2], [1, 1, 3, 5], [4, 4, 6, 8]]
-    ))
-
-  })
-
 })
 
 function range(array, author = 0) {
